@@ -12,7 +12,7 @@ BOTTOM_MARGIN = 200
 
 # Font paths and sizes
 FONT_PATH_BOLD = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
-FONT_PATH_REGULAR = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
+FONT_PATH_REGULAR = "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc"
 FONT_SIZE_TITLE = 60
 FONT_SIZE_YEAR = 100
 FONT_SIZE_DAYS = 35

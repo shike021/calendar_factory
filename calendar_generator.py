@@ -1,7 +1,31 @@
 import calendar
 from PIL import Image, ImageDraw, ImageFont
 import os
+from datetime import timedelta, date
+from lunarcalendar import Converter, Lunar
 from config import *
+
+
+def get_chinese_new_year_dates(year):
+    """Get the dates of Chinese New Year (正月初一 to 正月初五) for the given year."""
+    dates = []
+    for day in range(1, 6):  # 初一 to 初五
+        solar = Converter.Lunar2Solar(Lunar(year, 1, day))
+        dates.append((solar.day, solar.month))
+    return dates
+
+
+def get_chinese_new_year_eve(year):
+    """Get the date of Chinese New Year's Eve (除夕) for the given year."""
+    # Chinese New Year is Lunar New Year's Day (正月初一)
+    spring_festival = Converter.Lunar2Solar(Lunar(year, 1, 1))
+    # Convert to date object
+    festival_date = date(
+        spring_festival.year, spring_festival.month, spring_festival.day
+    )
+    # New Year's Eve is the day before
+    eve = festival_date - timedelta(days=1)
+    return eve.day, eve.month
 
 
 def load_fonts():
@@ -17,7 +41,22 @@ def load_fonts():
     return font, large_font, small_font
 
 
-def draw_month(draw, x, y, month, year, font, small_font, black, gray, red, blue):
+def draw_month(
+    draw,
+    x,
+    y,
+    month,
+    year,
+    font,
+    small_font,
+    black,
+    gray,
+    red,
+    blue,
+    new_year_dates,
+    eve_day,
+    eve_month,
+):
     """Draw a single month calendar."""
     # Draw month border
     draw.rectangle(
@@ -64,9 +103,20 @@ def draw_month(draw, x, y, month, year, font, small_font, black, gray, red, blue
     for week in cal:
         for i, day in enumerate(week):
             if day != 0:
-                color = red if i == 6 else blue if i == 5 else black
+                # Check if this is Chinese New Year's Eve or New Year (初一 to 初五)
+                if (day, month) == (eve_day, eve_month) or (
+                    day,
+                    month,
+                ) in new_year_dates:
+                    color = red
+                else:
+                    color = red if i == 6 else blue if i == 5 else black
                 text_x = x + 5 + i * cell_width + cell_width // 2 - 10
-                draw.text((text_x, start_y), str(day), fill=color, font=small_font)
+                # Special case for Chinese New Year's Day (初一): draw "福"
+                if (day, month) == new_year_dates[0]:
+                    draw.text((text_x, start_y), "福", fill=red, font=small_font)
+                else:
+                    draw.text((text_x, start_y), str(day), fill=color, font=small_font)
         draw.line(
             [x + 5, start_y + cell_height, x + month_width - 5, start_y + cell_height],
             fill=gray,
@@ -90,6 +140,11 @@ def generate_calendar(year):
 
         font, large_font, small_font = load_fonts()
 
+        # Get Chinese New Year dates (初一 to 初五)
+        new_year_dates = get_chinese_new_year_dates(year)
+        # Get Chinese New Year's Eve date
+        eve_day, eve_month = get_chinese_new_year_eve(year)
+
         # Draw year
         year_text = str(year)
         bbox = draw.textbbox((0, 0), year_text, font=large_font)
@@ -106,7 +161,20 @@ def generate_calendar(year):
                 x = col * ((WIDTH - LEFT_MARGIN - RIGHT_MARGIN) // 6) + LEFT_MARGIN
                 y = row * ((HEIGHT - TOP_MARGIN - BOTTOM_MARGIN) // 2) + TOP_MARGIN
                 draw_month(
-                    draw, x, y, month, year, font, small_font, BLACK, GRAY, RED, BLUE
+                    draw,
+                    x,
+                    y,
+                    month,
+                    year,
+                    font,
+                    small_font,
+                    BLACK,
+                    GRAY,
+                    RED,
+                    BLUE,
+                    new_year_dates,
+                    eve_day,
+                    eve_month,
                 )
 
         # Save
