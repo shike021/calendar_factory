@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "calendar-factory"
+version = "0.1.0"
+description = "Generate high-resolution calendar wallpapers"
+authors = [{ email = "imshike@gmail.com" }]
+dependencies = ["Pillow"]
+requires-python = ">=3.6"
+readme = "README.md"
+
+[project.scripts]
+calendar-factory = "main:main"
+
+[tool.setuptools]
+packages = ["."]
